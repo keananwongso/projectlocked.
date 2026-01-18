@@ -2,29 +2,42 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import { AnimatedCameraButton } from '../../src/components/ui/AnimatedCameraButton';
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#6366F1',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: '#FBBF24',
+        tabBarInactiveTintColor: '#6B7280',
         tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          marginTop: -4,
+        },
         tabBarItemStyle: {
-          paddingVertical: 10,
-          justifyContent: 'center',
+          paddingVertical: 8,
         },
         tabBarStyle: {
-          backgroundColor: '#1F2937', // Opaque
-          borderTopWidth: 0,
-          height: 85,
-          paddingBottom: 25,
-          paddingTop: 10,
+          backgroundColor: '#1F2937',
+          borderTopWidth: 1,
+          borderTopColor: '#374151',
+          height: 88,
+          paddingBottom: 28,
+          paddingTop: 8,
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
           elevation: 0,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
         },
         headerStyle: {
           backgroundColor: '#111827',
@@ -37,8 +50,8 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={26} color={color} />
           ),
           headerShown: false,
         }}
@@ -48,38 +61,28 @@ export default function TabsLayout() {
         options={{
           title: 'Lock In',
           tabBarLabel: () => null,
-          tabBarIcon: ({ size }) => (
+          tabBarIcon: () => null,
+          tabBarButton: (props) => (
             <View
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: '#FFFFFF',
+                flex: 1,
                 justifyContent: 'center',
                 alignItems: 'center',
-                shadowColor: '#000',
-                shadowOffset: {
-                  width: 0,
-                  height: 4,
-                },
-                shadowOpacity: 0.3,
-                shadowRadius: 4.65,
-                elevation: 8,
               }}
             >
-              <Ionicons name="camera" size={28} color="#000000" />
+              <AnimatedCameraButton onPress={props.onPress} />
             </View>
           ),
           headerShown: false,
-          tabBarStyle: { display: 'none' }, // Hide tab bar on camera screen
+          tabBarStyle: { display: 'none' },
         }}
       />
       <Tabs.Screen
         name="friends"
         options={{
           title: 'Friends',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "people" : "people-outline"} size={26} color={color} />
           ),
           headerShown: false,
         }}
