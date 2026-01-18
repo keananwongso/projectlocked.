@@ -47,7 +47,7 @@ export default function SetupScreen() {
       await startSession(
         duration,
         tag,
-        note,
+        '', // note removed from UI
         profile.username,
         profile.avatarUrl
       );

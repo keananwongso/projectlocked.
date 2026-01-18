@@ -1,5 +1,5 @@
 // Active session screen - Timer, proof status, end button
-import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
@@ -16,7 +16,6 @@ export default function ActiveSessionScreen() {
     tag,
     beforeProofUrl,
     endSession,
-    abandonSession,
   } = useSessionStore();
 
   const [secondsElapsed, setSecondsElapsed] = useState(0);
@@ -50,26 +49,9 @@ export default function ActiveSessionScreen() {
 
   const handleEndSession = useCallback(async () => {
     await endSession();
-    router.replace('/session/proof?type=after');
+    router.replace('/session/after-camera');
   }, [endSession, router]);
 
-  const handleAbandon = () => {
-    Alert.alert(
-      'Abandon Session?',
-      'This will end your session without completing it. Your friends will see it as abandoned.',
-      [
-        { text: 'Keep Going', style: 'cancel' },
-        {
-          text: 'Abandon',
-          style: 'destructive',
-          onPress: async () => {
-            await abandonSession();
-            router.replace('/(tabs)');
-          },
-        },
-      ]
-    );
-  };
 
   if (!sessionId) {
     router.replace('/(tabs)');
@@ -89,37 +71,30 @@ export default function ActiveSessionScreen() {
         {/* Timer */}
         <Timer secondsElapsed={secondsElapsed} totalSeconds={durationMin * 60} />
 
-        {/* Proof Status */}
-        <View style={styles.proofStatus}>
-          {beforeProofUrl ? (
-            <View style={styles.proofDone}>
-              <Text style={styles.proofDoneIcon}>✓</Text>
-              <Text style={styles.proofDoneText}>Before proof submitted</Text>
-            </View>
-          ) : proofWindowPassed ? (
-            <View style={styles.proofExpired}>
-              <Text style={styles.proofExpiredIcon}>✗</Text>
-              <Text style={styles.proofExpiredText}>Proof window expired</Text>
-            </View>
-          ) : (
-            <TouchableOpacity
-              onPress={() => router.push('/session/proof?type=before')}
-              style={styles.proofButton}
-            >
-              <Text style={styles.proofButtonText}>📸 Submit Before Proof</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {/* Proof Status - only show if proof not yet submitted */}
+        {!beforeProofUrl && (
+          <View style={styles.proofStatus}>
+            {proofWindowPassed ? (
+              <View style={styles.proofExpired}>
+                <Text style={styles.proofExpiredIcon}>✗</Text>
+                <Text style={styles.proofExpiredText}>Proof window expired</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => router.push('/session/proof?type=before')}
+                style={styles.proofButton}
+              >
+                <Text style={styles.proofButtonText}>📸 Submit Before Proof</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
 
       {/* Bottom Actions */}
       <View style={styles.footer}>
         <TouchableOpacity onPress={handleEndSession} style={styles.endButton}>
           <Text style={styles.endButtonText}>End Session</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleAbandon} style={styles.abandonButton}>
-          <Text style={styles.abandonButtonText}>Abandon Session</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
