@@ -99,10 +99,10 @@ export function SessionCard({ session }: SessionCardProps) {
           <Text style={styles.username}>{session.username}</Text>
           <Text style={styles.location}>Life Sciences Institute, UBC • {statusText}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.moreButton}
-          onPress={() => {
-            if (isMyPost) {
+        {isMyPost && (
+          <TouchableOpacity
+            style={styles.moreButton}
+            onPress={() => {
               Alert.alert(
                 "Delete Post",
                 "Are you sure you want to delete this post?",
@@ -114,9 +114,6 @@ export function SessionCard({ session }: SessionCardProps) {
                     onPress: async () => {
                       try {
                         await deleteSession(session.id);
-                        // Optional: Refresh feed or handle UI removal
-                        // For now, the database update happens, but the feed list might not update immediately without a refresh context.
-                        // Assuming basic implementation for now.
                       } catch (error) {
                         console.error("Error deleting session:", error);
                         Alert.alert("Error", "Failed to delete post.");
@@ -125,11 +122,11 @@ export function SessionCard({ session }: SessionCardProps) {
                   }
                 ]
               );
-            }
-          }}
-        >
-          <Text style={styles.moreButtonText}>•••</Text>
-        </TouchableOpacity>
+            }}
+          >
+            <Text style={styles.moreButtonText}>•••</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Note */}

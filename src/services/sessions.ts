@@ -11,8 +11,6 @@ import {
   DocumentSnapshot,
   deleteDoc,
   doc,
-  deleteDoc,
-  doc,
   onSnapshot,
   Unsubscribe,
 } from 'firebase/firestore';
