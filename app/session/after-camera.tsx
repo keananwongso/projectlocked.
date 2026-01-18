@@ -5,7 +5,6 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSessionStore } from '../../src/stores/sessionStore';
 
 const { width } = Dimensions.get('window');
 const CAM_HEIGHT = width * (4 / 3);
@@ -16,8 +15,6 @@ export default function AfterCameraScreen() {
     const cameraRef = useRef<CameraView>(null);
     const [facing, setFacing] = useState<'back' | 'front'>('back');
     const [isTakingPhoto, setIsTakingPhoto] = useState(false);
-
-    const { submitAfterProof, clearSession } = useSessionStore();
 
     if (!permission) {
         return <View style={styles.container} />;
@@ -48,15 +45,16 @@ export default function AfterCameraScreen() {
                 });
 
                 if (photo) {
-                    // Upload after proof and complete session
-                    await submitAfterProof(photo.uri);
-                    clearSession();
-                    router.replace('/(tabs)');
-                    Alert.alert('Session Complete!', 'Great work! Your session has been saved.');
+                    // Navigate to preview screen with photo URI
+                    router.push({
+                        pathname: '/session/after-preview',
+                        params: { photoUri: photo.uri }
+                    });
                 }
             } catch (error) {
-                console.error('Failed to submit after proof:', error);
-                Alert.alert('Error', 'Failed to submit proof. Please try again.');
+                console.error('Failed to take photo:', error);
+                Alert.alert('Error', 'Failed to take photo. Please try again.');
+            } finally {
                 setIsTakingPhoto(false);
             }
         }
@@ -70,7 +68,7 @@ export default function AfterCameraScreen() {
             <SafeAreaView style={styles.headerContainer}>
                 <View style={styles.header}>
                     <View style={{ width: 32 }} />
-                    <Text style={styles.headerTitle}>After Proof</Text>
+                    <Text style={styles.headerTitle}>Lock out.</Text>
                     <View style={{ width: 32 }} />
                 </View>
             </SafeAreaView>

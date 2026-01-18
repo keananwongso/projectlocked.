@@ -37,6 +37,22 @@ export default function SessionLayout() {
           gestureEnabled: false,
         }}
       />
+      <Stack.Screen
+        name="after-camera"
+        options={{
+          headerShown: false, // Custom header in the screen itself
+          headerBackVisible: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
+        name="after-preview"
+        options={{
+          headerShown: false, // Custom header in the screen itself
+          headerBackVisible: false,
+          gestureEnabled: false,
+        }}
+      />
     </Stack>
   );
 }
