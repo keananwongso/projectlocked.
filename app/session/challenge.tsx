@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform, Alert, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useSessionStore } from '../../src/stores/sessionStore';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../src/services/firebase';
 
 export default function ChallengeScreen() {
     const router = useRouter();
@@ -14,16 +16,41 @@ export default function ChallengeScreen() {
     const [photo, setPhoto] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [timeLeft, setTimeLeft] = useState(30);
+    const [aiConfidence, setAiConfidence] = useState<number | null>(null);
+    const [aiFeedback, setAiFeedback] = useState<string | null>(null);
 
     const submitChallenge = useSessionStore(state => state.submitChallenge);
     const activeStatus = useSessionStore(state => state.status);
+    const sessionId = useSessionStore(state => state.sessionId);
 
     useEffect(() => {
         // If we leave the "challenged" state (e.g. submitted), go back home
-        if (activeStatus === 'completed') {
-            router.replace('/(tabs)');
+        if (activeStatus === 'completed' && aiConfidence !== null) {
+            // Show AI result before navigating
+            Alert.alert(
+                "Verified! 🎉", 
+                aiFeedback || `The AI thinks you're ${aiConfidence}% locked in. Streak saved!`,
+                [{ text: "OK", onPress: () => router.replace('/(tabs)') }]
+            );
         }
-    }, [activeStatus]);
+    }, [activeStatus, aiConfidence, aiFeedback]);
+
+    // Listen to session updates for AI results
+    useEffect(() => {
+        if (!sessionId) return;
+
+        const unsubscribe = onSnapshot(doc(db, 'sessions', sessionId), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.aiConfidence !== undefined) {
+                    setAiConfidence(data.aiConfidence);
+                    setAiFeedback(data.aiFeedback);
+                }
+            }
+        });
+
+        return () => unsubscribe();
+    }, [sessionId]);
 
     // Countdown
     useEffect(() => {
@@ -74,10 +101,10 @@ export default function ChallengeScreen() {
         setSubmitting(true);
         try {
             await submitChallenge(photo);
-            Alert.alert("Verified!", "The AI has accepted your proof. Streak saved.");
+            // Alert will be shown by the useEffect when AI results are available
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Failed to submit proof');
+            Alert.alert('Error', 'Failed to submit proof. Please try again.');
             setSubmitting(false);
         }
     };
@@ -128,22 +155,30 @@ export default function ChallengeScreen() {
             <View style={styles.footer}>
                 {photo ? (
                     <View style={styles.actionRow}>
-                        <TouchableOpacity
-                            style={styles.retakeButton}
-                            onPress={() => setPhoto(null)}
-                            disabled={submitting}
-                        >
-                            <Text style={styles.retakeText}>Retake</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.submitButton}
-                            onPress={handleSubmit}
-                            disabled={submitting}
-                        >
-                            <Text style={styles.submitText}>
-                                {submitting ? 'Verifying...' : 'Submit Proof'}
-                            </Text>
-                        </TouchableOpacity>
+                        {submitting ? (
+                            <View style={styles.verifyingContainer}>
+                                <ActivityIndicator size="large" color="white" />
+                                <Text style={styles.verifyingText}>🤖 AI is checking...</Text>
+                                <Text style={styles.verifyingSubtext}>Analyzing your lock-in level</Text>
+                            </View>
+                        ) : (
+                            <>
+                                <TouchableOpacity
+                                    style={styles.retakeButton}
+                                    onPress={() => setPhoto(null)}
+                                    disabled={submitting}
+                                >
+                                    <Text style={styles.retakeText}>Retake</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.submitButton}
+                                    onPress={handleSubmit}
+                                    disabled={submitting}
+                                >
+                                    <Text style={styles.submitText}>Submit Proof</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
                     </View>
                 ) : (
                     <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
@@ -256,5 +291,22 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginTop: 20,
         alignSelf: 'center',
+    },
+    verifyingContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 24,
+    },
+    verifyingText: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginTop: 16,
+    },
+    verifyingSubtext: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 14,
+        marginTop: 8,
     },
 });

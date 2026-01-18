@@ -7,3 +7,9 @@ export const firebaseConfig = {
   messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
 };
+
+// Gemini AI configuration
+export const geminiConfig = {
+  apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY || '',
+  model: 'gemini-2.0-flash-exp' // Fast model with vision capabilities
+};

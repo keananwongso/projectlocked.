@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { doc, setDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db, auth } from '../services/firebase';
 import { uploadProofImage } from '../services/storage';
+import { verifyLockInPhoto } from '../services/aiVerification';
 import { ActiveSessionState, SessionTag, SessionStatus, Session } from '../types';
 
 // Generate a simple unique ID
@@ -132,16 +133,20 @@ export const useSessionStore = create<ActiveSessionState>((set, get) => ({
     const { sessionId } = get();
     if (!sessionId) return;
 
+    // First, verify with AI before uploading
+    console.log('Verifying challenge photo with AI...');
+    const verificationResult = await verifyLockInPhoto(imageUri);
+    console.log('AI Verification result:', verificationResult);
+
+    // Upload the challenge photo
     const url = await uploadProofImage(imageUri, sessionId, 'challenge');
 
-    // Mock AI Verification for now
-    const mockConfidence = Math.floor(Math.random() * 20) + 80; // 80-100 score
-
+    // Update session with AI verification results
     await updateDoc(doc(db, 'sessions', sessionId), {
-      status: 'completed' as SessionStatus, // Or back to Active? No, complete it.
+      status: 'completed' as SessionStatus,
       challengeProofUrl: url,
-      aiConfidence: mockConfidence,
-      aiFeedback: 'AI verification passed. Good job!',
+      aiConfidence: verificationResult.confidence,
+      aiFeedback: verificationResult.feedback,
     });
 
     set({ status: 'completed' });
