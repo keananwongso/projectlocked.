@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   mainPhoto: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
+    borderRadius: 20,
   },
   insetPhotoWrapper: {
     position: 'absolute',
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     left: 12,
     width: '30%',
     aspectRatio: 3 / 4,
-    borderRadius: 10,
+    borderRadius: 16, // Increased curve
     borderWidth: 2,
     borderColor: 'black',
     overflow: 'hidden',

@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 25,
-    paddingHorizontal: 24,
+    paddingHorizontal: 12, // Reduced padding
   },
   headerLeftContainer: {
     flexDirection: 'row',
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   todayBlob: {
     marginBottom: 15,
-    marginHorizontal: 24,
+    marginHorizontal: 12, // Reduced margin
   },
   feedSection: {
     marginTop: 8,
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     marginBottom: 21,
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
   },
   feedItem: {
     marginBottom: 16,
