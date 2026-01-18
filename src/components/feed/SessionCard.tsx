@@ -1,5 +1,5 @@
 // Session card for feed display
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Animated } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Animated, Alert } from 'react-native';
 import { useState, useRef } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
@@ -8,6 +8,7 @@ import { ReactionBar } from './ReactionBar';
 import { DecisionBar } from './DecisionBar';
 import { Confetti } from './Confetti';
 import { auth } from '../../services/firebase';
+import { deleteSession } from '../../services/sessions';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_MARGIN = 0; // Padding is handled by container or content
@@ -98,7 +99,35 @@ export function SessionCard({ session }: SessionCardProps) {
           <Text style={styles.username}>{session.username}</Text>
           <Text style={styles.location}>Life Sciences Institute, UBC • {statusText}</Text>
         </View>
-        <TouchableOpacity style={styles.moreButton}>
+        <TouchableOpacity
+          style={styles.moreButton}
+          onPress={() => {
+            if (isMyPost) {
+              Alert.alert(
+                "Delete Post",
+                "Are you sure you want to delete this post?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        await deleteSession(session.id);
+                        // Optional: Refresh feed or handle UI removal
+                        // For now, the database update happens, but the feed list might not update immediately without a refresh context.
+                        // Assuming basic implementation for now.
+                      } catch (error) {
+                        console.error("Error deleting session:", error);
+                        Alert.alert("Error", "Failed to delete post.");
+                      }
+                    }
+                  }
+                ]
+              );
+            }
+          }}
+        >
           <Text style={styles.moreButtonText}>•••</Text>
         </TouchableOpacity>
       </View>
@@ -112,6 +141,7 @@ export function SessionCard({ session }: SessionCardProps) {
           <ScrollView
             horizontal
             pagingEnabled
+            scrollEnabled={photos.length > 1}
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}

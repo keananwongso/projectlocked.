@@ -35,6 +35,7 @@ export default function SetupScreen() {
 
   const [duration, setDuration] = useState(DURATION_PRESETS[0]);
   const [tag, setTag] = useState<SessionTag>('Study');
+  const [note, setNote] = useState('');
   const [selectedBuddies, setSelectedBuddies] = useState<string[]>([]);
   const [starting, setStarting] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -89,6 +90,18 @@ export default function SetupScreen() {
             <Image source={{ uri: initialProofUri }} style={styles.photoPreview} />
           </TouchableOpacity>
         )}
+
+        {/* Note Input - Small and simple below duration */}
+        <View style={styles.section}>
+          <TextInput
+            style={styles.simpleNoteInput}
+            placeholder="Add a note (optional)..."
+            placeholderTextColor="rgba(156, 163, 175, 0.5)"
+            value={note}
+            onChangeText={setNote}
+            maxLength={60}
+          />
+        </View>
 
         {/* Tag Selector - No header */}
         <View style={styles.section}>
@@ -198,7 +211,20 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   durationSection: {
-    marginBottom: 32,
+    marginBottom: 24,
+  },
+  simpleNoteInput: {
+    backgroundColor: 'transparent',
+    color: 'white',
+    fontSize: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 0,
+    textAlign: 'left',
+    borderWidth: 0,
+    marginHorizontal: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+    width: '100%',
   },
   sectionLabel: {
     color: 'white',
@@ -277,7 +303,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   photoPreview: {
-    width: '90%',
+    width: '100%',
     aspectRatio: 3 / 4,
     borderRadius: 16,
     backgroundColor: '#374151',

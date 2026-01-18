@@ -20,6 +20,10 @@ const Particle = ({ color, index, type, count }: ParticleProps) => {
     const rotateY = useRef(new Animated.Value(Math.random())).current;
     const rotateZ = useRef(new Animated.Value(Math.random())).current;
 
+    // Shape and size refs
+    const shape = useRef(Math.floor(Math.random() * 3)).current;
+    const size = useRef(8 + Math.random() * 12).current;
+
     // Trajectory settings
     const isCross = type === 'cross';
     const angle = useRef((index / count) * 360 + (Math.random() * 20 - 10)).current;
@@ -96,8 +100,6 @@ const Particle = ({ color, index, type, count }: ParticleProps) => {
     }
 
     // Tick Mode: Standard high-energy confetti
-    const shape = useRef(Math.floor(Math.random() * 3)).current;
-    const size = useRef(8 + Math.random() * 12).current;
 
     return (
         <Animated.View

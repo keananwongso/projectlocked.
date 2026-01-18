@@ -9,6 +9,12 @@ import {
   startAfter,
   Timestamp,
   DocumentSnapshot,
+  deleteDoc,
+  doc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Session } from '../types';
@@ -75,4 +81,40 @@ export async function getTodaySessions(userId: string): Promise<Session[]> {
 
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Session);
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  await deleteDoc(doc(db, 'sessions', sessionId));
+}
+
+export function subscribeToFriendsSessions(
+  friendIds: string[],
+  onUpdate: (data: { sessions: Session[]; lastDoc: DocumentSnapshot | null }) => void,
+  limitCount: number = 20
+): Unsubscribe {
+  if (friendIds.length === 0) {
+    onUpdate({ sessions: [], lastDoc: null });
+    return () => { };
+  }
+
+  // Firestore 'in' queries limited to 30 items
+  const batchedIds = friendIds.slice(0, 30);
+
+  const q = query(
+    collection(db, 'sessions'),
+    where('userId', 'in', batchedIds),
+    where('status', 'in', ['active', 'completed', 'abandoned']),
+    orderBy('startedAt', 'desc'),
+    limit(limitCount)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const sessions = snapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() }) as Session
+    );
+    const lastDoc =
+      snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
+
+    onUpdate({ sessions, lastDoc });
+  });
 }

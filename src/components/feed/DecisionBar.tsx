@@ -71,7 +71,7 @@ export function DecisionBar({ sessionId, onDecision }: DecisionBarProps) {
                     ]}
                 >
                     <MaterialCommunityIcons
-                        name="lock"
+                        name="check"
                         size={32}
                         color={userDecision === 'tick' ? '#10B981' : 'white'}
                     />
@@ -88,7 +88,7 @@ export function DecisionBar({ sessionId, onDecision }: DecisionBarProps) {
                     ]}
                 >
                     <MaterialCommunityIcons
-                        name="emoticon-neutral"
+                        name="close"
                         size={32}
                         color={userDecision === 'cross' ? '#EF4444' : 'white'}
                     />
